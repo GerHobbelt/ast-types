@@ -16,7 +16,6 @@ import esprimaDef from "../def/esprima";
 import coreDef from "../def/core";
 import es6Def from "../def/es6";
 import es7Def from "../def/es7";
-import mozillaDef from "../def/mozilla";
 import babelDef from "../def/babel";
 
 var n = types.namedTypes;
@@ -1433,7 +1432,6 @@ describe("array and object pattern scope", function() {
       coreDef,
       es6Def,
       es7Def,
-      mozillaDef,
     ]);
     var b = types.builders;
 
@@ -2010,6 +2008,20 @@ describe("path.insertAt", function() {
     elems.insertAt(-2, -2, -1);
     assert.deepEqual(elems.value, [-2, -1, 0, "a", "b", "foo", true,, []]);
     assert.strictEqual(elems.get("length").value, 9);
+  });
+
+  it("should insert nodes even when path.value is empty", function() {
+    var path = new NodePath({
+      elements: []
+    });
+
+    var elems = path.get("elements");
+    elems.insertAt(0, 0, "foo", true);
+    assert.deepEqual(elems.value, [0, "foo", true]);
+
+    elems.replace([]);
+    elems.insertAt(1, 0, "foo", true);
+    assert.deepEqual(elems.value, [, 0, "foo", true]);
   });
 
   it("should throw when path.value not an array", function() {

@@ -89,29 +89,6 @@ export interface Visitor<M = {}> {
   visitSpreadProperty?(this: Context & M, path: NodePath<N.SpreadProperty>): any;
   visitSpreadPropertyPattern?(this: Context & M, path: NodePath<N.SpreadPropertyPattern>): any;
   visitAwaitExpression?(this: Context & M, path: NodePath<N.AwaitExpression>): any;
-  visitLetStatement?(this: Context & M, path: NodePath<N.LetStatement>): any;
-  visitLetExpression?(this: Context & M, path: NodePath<N.LetExpression>): any;
-  visitGraphExpression?(this: Context & M, path: NodePath<N.GraphExpression>): any;
-  visitGraphIndexExpression?(this: Context & M, path: NodePath<N.GraphIndexExpression>): any;
-  visitXMLDefaultDeclaration?(this: Context & M, path: NodePath<N.XMLDefaultDeclaration>): any;
-  visitXMLAnyName?(this: Context & M, path: NodePath<N.XMLAnyName>): any;
-  visitXMLQualifiedIdentifier?(this: Context & M, path: NodePath<N.XMLQualifiedIdentifier>): any;
-  visitXMLFunctionQualifiedIdentifier?(this: Context & M, path: NodePath<N.XMLFunctionQualifiedIdentifier>): any;
-  visitXMLAttributeSelector?(this: Context & M, path: NodePath<N.XMLAttributeSelector>): any;
-  visitXMLFilterExpression?(this: Context & M, path: NodePath<N.XMLFilterExpression>): any;
-  visitXML?(this: Context & M, path: NodePath<N.XML>): any;
-  visitXMLElement?(this: Context & M, path: NodePath<N.XMLElement>): any;
-  visitXMLList?(this: Context & M, path: NodePath<N.XMLList>): any;
-  visitXMLEscape?(this: Context & M, path: NodePath<N.XMLEscape>): any;
-  visitXMLText?(this: Context & M, path: NodePath<N.XMLText>): any;
-  visitXMLStartTag?(this: Context & M, path: NodePath<N.XMLStartTag>): any;
-  visitXMLEndTag?(this: Context & M, path: NodePath<N.XMLEndTag>): any;
-  visitXMLPointTag?(this: Context & M, path: NodePath<N.XMLPointTag>): any;
-  visitXMLName?(this: Context & M, path: NodePath<N.XMLName>): any;
-  visitXMLAttribute?(this: Context & M, path: NodePath<N.XMLAttribute>): any;
-  visitXMLCdata?(this: Context & M, path: NodePath<N.XMLCdata>): any;
-  visitXMLComment?(this: Context & M, path: NodePath<N.XMLComment>): any;
-  visitXMLProcessingInstruction?(this: Context & M, path: NodePath<N.XMLProcessingInstruction>): any;
   visitJSXAttribute?(this: Context & M, path: NodePath<N.JSXAttribute>): any;
   visitJSXIdentifier?(this: Context & M, path: NodePath<N.JSXIdentifier>): any;
   visitJSXNamespacedName?(this: Context & M, path: NodePath<N.JSXNamespacedName>): any;
@@ -133,6 +110,10 @@ export interface Visitor<M = {}> {
   visitTSTypeParameterInstantiation?(this: Context & M, path: NodePath<N.TSTypeParameterInstantiation>): any;
   visitClassImplements?(this: Context & M, path: NodePath<N.ClassImplements>): any;
   visitTSType?(this: Context & M, path: NodePath<N.TSType>): any;
+  visitTSHasOptionalTypeParameterInstantiation?(
+    this: Context & M,
+    path: NodePath<N.TSHasOptionalTypeParameterInstantiation>
+  ): any;
   visitTSExpressionWithTypeArguments?(this: Context & M, path: NodePath<N.TSExpressionWithTypeArguments>): any;
   visitFlow?(this: Context & M, path: NodePath<N.Flow>): any;
   visitFlowType?(this: Context & M, path: NodePath<N.FlowType>): any;
@@ -233,6 +214,7 @@ export interface Visitor<M = {}> {
   visitTSAsExpression?(this: Context & M, path: NodePath<N.TSAsExpression>): any;
   visitTSNonNullExpression?(this: Context & M, path: NodePath<N.TSNonNullExpression>): any;
   visitTSAnyKeyword?(this: Context & M, path: NodePath<N.TSAnyKeyword>): any;
+  visitTSBigIntKeyword?(this: Context & M, path: NodePath<N.TSBigIntKeyword>): any;
   visitTSBooleanKeyword?(this: Context & M, path: NodePath<N.TSBooleanKeyword>): any;
   visitTSNeverKeyword?(this: Context & M, path: NodePath<N.TSNeverKeyword>): any;
   visitTSNullKeyword?(this: Context & M, path: NodePath<N.TSNullKeyword>): any;
@@ -270,6 +252,7 @@ export interface Visitor<M = {}> {
   visitTSConstructSignatureDeclaration?(this: Context & M, path: NodePath<N.TSConstructSignatureDeclaration>): any;
   visitTSEnumMember?(this: Context & M, path: NodePath<N.TSEnumMember>): any;
   visitTSTypeQuery?(this: Context & M, path: NodePath<N.TSTypeQuery>): any;
+  visitTSImportType?(this: Context & M, path: NodePath<N.TSImportType>): any;
   visitTSTypeLiteral?(this: Context & M, path: NodePath<N.TSTypeLiteral>): any;
   visitTSTypeAssertion?(this: Context & M, path: NodePath<N.TSTypeAssertion>): any;
   visitTSEnumDeclaration?(this: Context & M, path: NodePath<N.TSEnumDeclaration>): any;

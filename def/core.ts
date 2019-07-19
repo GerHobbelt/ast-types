@@ -248,7 +248,7 @@ export default function (fork: Fork) {
         "+", "-", "*", "/", "%", "**",
         "&", // TODO Missing from the Parser API.
         "|", "^", "in",
-        "instanceof", "..");
+        "instanceof");
 
     def("BinaryExpression")
         .bases("Expression")

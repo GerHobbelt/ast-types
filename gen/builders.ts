@@ -306,14 +306,12 @@ export interface ForInStatementBuilder {
   (
     left: K.VariableDeclarationKind | K.ExpressionKind,
     right: K.ExpressionKind,
-    body: K.StatementKind,
-    each?: boolean
+    body: K.StatementKind
   ): N.ForInStatement;
   from(
     params: {
       body: K.StatementKind,
       comments?: K.CommentKind[] | null,
-      each?: boolean,
       left: K.VariableDeclarationKind | K.ExpressionKind,
       loc?: K.SourceLocationKind | null,
       right: K.ExpressionKind
@@ -335,14 +333,14 @@ export interface FunctionDeclarationBuilder {
   (
     id: K.IdentifierKind,
     params: K.PatternKind[],
-    body: K.BlockStatementKind | K.ExpressionKind,
+    body: K.BlockStatementKind,
     generator?: boolean,
     expression?: boolean
   ): N.FunctionDeclaration;
   from(
     params: {
       async?: boolean,
-      body: K.BlockStatementKind | K.ExpressionKind,
+      body: K.BlockStatementKind,
       comments?: K.CommentKind[] | null,
       defaults?: (K.ExpressionKind | null)[],
       expression?: boolean,
@@ -361,14 +359,14 @@ export interface FunctionExpressionBuilder {
   (
     id: K.IdentifierKind | null | undefined,
     params: K.PatternKind[],
-    body: K.BlockStatementKind | K.ExpressionKind,
+    body: K.BlockStatementKind,
     generator?: boolean,
     expression?: boolean
   ): N.FunctionExpression;
   from(
     params: {
       async?: boolean,
-      body: K.BlockStatementKind | K.ExpressionKind,
+      body: K.BlockStatementKind,
       comments?: K.CommentKind[] | null,
       defaults?: (K.ExpressionKind | null)[],
       expression?: boolean,
@@ -497,7 +495,7 @@ export interface UnaryExpressionBuilder {
 
 export interface BinaryExpressionBuilder {
   (
-    operator: "==" | "!=" | "===" | "!==" | "<" | "<=" | ">" | ">=" | "<<" | ">>" | ">>>" | "+" | "-" | "*" | "/" | "%" | "**" | "&" | "|" | "^" | "in" | "instanceof" | "..",
+    operator: "==" | "!=" | "===" | "!==" | "<" | "<=" | ">" | ">=" | "<<" | ">>" | ">>>" | "+" | "-" | "*" | "/" | "%" | "**" | "&" | "|" | "^" | "in" | "instanceof",
     left: K.ExpressionKind,
     right: K.ExpressionKind
   ): N.BinaryExpression;
@@ -506,7 +504,7 @@ export interface BinaryExpressionBuilder {
       comments?: K.CommentKind[] | null,
       left: K.ExpressionKind,
       loc?: K.SourceLocationKind | null,
-      operator: "==" | "!=" | "===" | "!==" | "<" | "<=" | ">" | ">=" | "<<" | ">>" | ">>>" | "+" | "-" | "*" | "/" | "%" | "**" | "&" | "|" | "^" | "in" | "instanceof" | "..",
+      operator: "==" | "!=" | "===" | "!==" | "<" | "<=" | ">" | ">=" | "<<" | ">>" | ">>>" | "+" | "-" | "*" | "/" | "%" | "**" | "&" | "|" | "^" | "in" | "instanceof",
       right: K.ExpressionKind
     }
   ): N.BinaryExpression;
@@ -1093,53 +1091,6 @@ export interface AwaitExpressionBuilder {
       loc?: K.SourceLocationKind | null
     }
   ): N.AwaitExpression;
-}
-
-export interface LetStatementBuilder {
-  (head: K.VariableDeclaratorKind[], body: K.StatementKind): N.LetStatement;
-  from(
-    params: {
-      body: K.StatementKind,
-      comments?: K.CommentKind[] | null,
-      head: K.VariableDeclaratorKind[],
-      loc?: K.SourceLocationKind | null
-    }
-  ): N.LetStatement;
-}
-
-export interface LetExpressionBuilder {
-  (head: K.VariableDeclaratorKind[], body: K.ExpressionKind): N.LetExpression;
-  from(
-    params: {
-      body: K.ExpressionKind,
-      comments?: K.CommentKind[] | null,
-      head: K.VariableDeclaratorKind[],
-      loc?: K.SourceLocationKind | null
-    }
-  ): N.LetExpression;
-}
-
-export interface GraphExpressionBuilder {
-  (index: number, expression: K.LiteralKind): N.GraphExpression;
-  from(
-    params: {
-      comments?: K.CommentKind[] | null,
-      expression: K.LiteralKind,
-      index: number,
-      loc?: K.SourceLocationKind | null
-    }
-  ): N.GraphExpression;
-}
-
-export interface GraphIndexExpressionBuilder {
-  (index: number): N.GraphIndexExpression;
-  from(
-    params: {
-      comments?: K.CommentKind[] | null,
-      index: number,
-      loc?: K.SourceLocationKind | null
-    }
-  ): N.GraphIndexExpression;
 }
 
 export interface JSXAttributeBuilder {
@@ -2702,6 +2653,16 @@ export interface TSAnyKeywordBuilder {
   ): N.TSAnyKeyword;
 }
 
+export interface TSBigIntKeywordBuilder {
+  (): N.TSBigIntKeyword;
+  from(
+    params: {
+      comments?: K.CommentKind[] | null,
+      loc?: K.SourceLocationKind | null
+    }
+  ): N.TSBigIntKeyword;
+}
+
 export interface TSBooleanKeywordBuilder {
   (): N.TSBooleanKeyword;
   from(
@@ -3181,14 +3142,31 @@ export interface TSEnumMemberBuilder {
 }
 
 export interface TSTypeQueryBuilder {
-  (exprName: K.IdentifierKind | K.TSQualifiedNameKind): N.TSTypeQuery;
+  (exprName: K.IdentifierKind | K.TSQualifiedNameKind | K.TSImportTypeKind): N.TSTypeQuery;
   from(
     params: {
       comments?: K.CommentKind[] | null,
-      exprName: K.IdentifierKind | K.TSQualifiedNameKind,
+      exprName: K.IdentifierKind | K.TSQualifiedNameKind | K.TSImportTypeKind,
       loc?: K.SourceLocationKind | null
     }
   ): N.TSTypeQuery;
+}
+
+export interface TSImportTypeBuilder {
+  (
+    argument: K.StringLiteralKind,
+    qualifier?: K.IdentifierKind | K.TSQualifiedNameKind | undefined,
+    typeParameters?: K.TSTypeParameterInstantiationKind | null
+  ): N.TSImportType;
+  from(
+    params: {
+      argument: K.StringLiteralKind,
+      comments?: K.CommentKind[] | null,
+      loc?: K.SourceLocationKind | null,
+      qualifier?: K.IdentifierKind | K.TSQualifiedNameKind | undefined,
+      typeParameters?: K.TSTypeParameterInstantiationKind | null
+    }
+  ): N.TSImportType;
 }
 
 export interface TSTypeLiteralBuilder {
@@ -3494,10 +3472,6 @@ export interface Builders {
   spreadProperty: SpreadPropertyBuilder;
   spreadPropertyPattern: SpreadPropertyPatternBuilder;
   awaitExpression: AwaitExpressionBuilder;
-  letStatement: LetStatementBuilder;
-  letExpression: LetExpressionBuilder;
-  graphExpression: GraphExpressionBuilder;
-  graphIndexExpression: GraphIndexExpressionBuilder;
   jsxAttribute: JSXAttributeBuilder;
   jsxIdentifier: JSXIdentifierBuilder;
   jsxNamespacedName: JSXNamespacedNameBuilder;
@@ -3613,6 +3587,7 @@ export interface Builders {
   tsAsExpression: TSAsExpressionBuilder;
   tsNonNullExpression: TSNonNullExpressionBuilder;
   tsAnyKeyword: TSAnyKeywordBuilder;
+  tsBigIntKeyword: TSBigIntKeywordBuilder;
   tsBooleanKeyword: TSBooleanKeywordBuilder;
   tsNeverKeyword: TSNeverKeywordBuilder;
   tsNullKeyword: TSNullKeywordBuilder;
@@ -3650,6 +3625,7 @@ export interface Builders {
   tsConstructSignatureDeclaration: TSConstructSignatureDeclarationBuilder;
   tsEnumMember: TSEnumMemberBuilder;
   tsTypeQuery: TSTypeQueryBuilder;
+  tsImportType: TSImportTypeBuilder;
   tsTypeLiteral: TSTypeLiteralBuilder;
   tsTypeAssertion: TSTypeAssertionBuilder;
   tsEnumDeclaration: TSEnumDeclarationBuilder;
