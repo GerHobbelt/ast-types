@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var assert_1 = __importDefault(require("assert"));
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var glob_1 = __importDefault(require("glob"));
@@ -10,6 +11,7 @@ var parser_1 = require("@babel/parser");
 var fork_1 = __importDefault(require("../fork"));
 var typescript_1 = __importDefault(require("../def/typescript"));
 var jsx_1 = __importDefault(require("../def/jsx"));
+var main_1 = require("../main");
 var pkgRootDir = path_1.default.resolve(__dirname, "..");
 var tsTypes = fork_1.default([
     typescript_1.default,
@@ -29,9 +31,7 @@ glob_1.default("**/input.js", {
         }
         files.forEach(function (tsPath) {
             var fullPath = path_1.default.join(babelTSFixturesDir, tsPath);
-            // Until https://github.com/babel/babel/pull/7967 is released:
-            var shouldSkip = tsPath.endsWith("conditional-infer/input.js");
-            (shouldSkip ? xit : it)("should validate " + path_1.default.relative(pkgRootDir, fullPath), function (done) {
+            it("should validate " + path_1.default.relative(pkgRootDir, fullPath), function (done) {
                 fs_1.default.readFile(fullPath, "utf8", function (error, code) {
                     if (error) {
                         throw error;
@@ -117,11 +117,32 @@ glob_1.default("**/*.ts", {
                             "objectRestSpread",
                             "classProperties",
                             "optionalCatchBinding",
+                            "numericSeparator",
                         ]
                     }).program;
                     tsTypes.namedTypes.Program.assert(program, true);
                     done();
                 });
+            });
+        });
+    });
+    describe('scope', function () {
+        var scope = [
+            "type Foo = {}",
+            "interface Bar {}"
+        ];
+        var ast = parser_1.parse(scope.join("\n"), {
+            plugins: ['typescript']
+        });
+        it("should register typescript types with the scope", function () {
+            main_1.visit(ast, {
+                visitProgram: function (path) {
+                    assert_1.default(path.scope.declaresType('Foo'));
+                    assert_1.default(path.scope.declaresType('Bar'));
+                    assert_1.default.equal(path.scope.lookupType('Foo').getTypes()['Foo'][0].parent.node.type, 'TSTypeAliasDeclaration');
+                    assert_1.default.equal(path.scope.lookupType('Bar').getTypes()['Bar'][0].parent.node.type, 'TSInterfaceDeclaration');
+                    return false;
+                }
             });
         });
     });

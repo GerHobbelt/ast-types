@@ -31,11 +31,14 @@ function default_1(fork) {
     }, "StringLiteral");
     def("TSType")
         .bases("Node");
-    var IdOrQualifiedName = or(def("Identifier"), def("TSQualifiedName"));
+    var TSEntityName = or(def("Identifier"), def("TSQualifiedName"));
     def("TSTypeReference")
-        .bases("TSType")
+        .bases("TSType", "TSHasOptionalTypeParameterInstantiation")
         .build("typeName", "typeParameters")
-        .field("typeName", IdOrQualifiedName)
+        .field("typeName", TSEntityName);
+    // An abstract (non-buildable) base type that provide a commonly-needed
+    // optional .typeParameters field.
+    def("TSHasOptionalTypeParameterInstantiation")
         .field("typeParameters", or(def("TSTypeParameterInstantiation"), null), defaults["null"]);
     // An abstract (non-buildable) base type that provide a commonly-needed
     // optional .typeParameters field.
@@ -48,20 +51,21 @@ function default_1(fork) {
     def("TSQualifiedName")
         .bases("Node")
         .build("left", "right")
-        .field("left", IdOrQualifiedName)
-        .field("right", IdOrQualifiedName);
+        .field("left", TSEntityName)
+        .field("right", TSEntityName);
     def("TSAsExpression")
-        .bases("Expression")
-        .build("expression")
+        .bases("Expression", "Pattern")
+        .build("expression", "typeAnnotation")
         .field("expression", def("Expression"))
         .field("typeAnnotation", def("TSType"))
         .field("extra", or({ parenthesized: Boolean }, null), defaults["null"]);
     def("TSNonNullExpression")
-        .bases("Expression")
+        .bases("Expression", "Pattern")
         .build("expression")
         .field("expression", def("Expression"));
     [
         "TSAnyKeyword",
+        "TSBigIntKeyword",
         "TSBooleanKeyword",
         "TSNeverKeyword",
         "TSNullKeyword",
@@ -85,7 +89,7 @@ function default_1(fork) {
     def("TSLiteralType")
         .bases("TSType")
         .build("literal")
-        .field("literal", or(def("NumericLiteral"), def("StringLiteral"), def("BooleanLiteral")));
+        .field("literal", or(def("NumericLiteral"), def("StringLiteral"), def("BooleanLiteral"), def("TemplateLiteral"), def("UnaryExpression")));
     ["TSUnionType",
         "TSIntersectionType",
     ].forEach(function (typeName) {
@@ -109,7 +113,7 @@ function default_1(fork) {
         .bases("TSType")
         .build("typeAnnotation")
         .field("typeAnnotation", def("TSType"));
-    var ParametersType = [or(def("Identifier"), def("RestElement"), def("ObjectPattern"))];
+    var ParametersType = [or(def("Identifier"), def("RestElement"), def("ArrayPattern"), def("ObjectPattern"))];
     ["TSFunctionType",
         "TSConstructorType",
     ].forEach(function (typeName) {
@@ -226,7 +230,7 @@ function default_1(fork) {
     def("TSTypeQuery")
         .bases("TSType")
         .build("exprName")
-        .field("exprName", IdOrQualifiedName);
+        .field("exprName", or(TSEntityName, def("TSImportType")));
     // Inferred from Babylon's tsParseTypeMember method.
     var TSTypeMember = or(def("TSCallSignatureDeclaration"), def("TSConstructSignatureDeclaration"), def("TSIndexSignature"), def("TSMethodSignature"), def("TSPropertySignature"));
     def("TSTypeLiteral")
@@ -240,7 +244,7 @@ function default_1(fork) {
         .field("constraint", or(def("TSType"), void 0), defaults["undefined"])
         .field("default", or(def("TSType"), void 0), defaults["undefined"]);
     def("TSTypeAssertion")
-        .bases("Expression")
+        .bases("Expression", "Pattern")
         .build("typeAnnotation", "expression")
         .field("typeAnnotation", def("TSType"))
         .field("expression", def("Expression"))
@@ -274,21 +278,21 @@ function default_1(fork) {
     def("TSModuleDeclaration")
         .bases("Declaration")
         .build("id", "body")
-        .field("id", or(StringLiteral, IdOrQualifiedName))
+        .field("id", or(StringLiteral, TSEntityName))
         .field("declare", Boolean, defaults["false"])
         .field("global", Boolean, defaults["false"])
         .field("body", or(def("TSModuleBlock"), def("TSModuleDeclaration"), null), defaults["null"]);
     def("TSImportType")
-        .bases("TSType", "TSHasOptionalTypeParameters")
-        .build("argument", "qualifier")
-        .field("argument", or(StringLiteral, IdOrQualifiedName))
-        .field("qualifier", or(StringLiteral, IdOrQualifiedName, null, void 0), defaults["undefined"]);
+        .bases("TSType", "TSHasOptionalTypeParameterInstantiation")
+        .build("argument", "qualifier", "typeParameters")
+        .field("argument", StringLiteral)
+        .field("qualifier", or(TSEntityName, void 0), defaults["undefined"]);
     def("TSImportEqualsDeclaration")
         .bases("Declaration")
         .build("id", "moduleReference")
         .field("id", def("Identifier"))
         .field("isExport", Boolean, defaults["false"])
-        .field("moduleReference", or(IdOrQualifiedName, def("TSExternalModuleReference")));
+        .field("moduleReference", or(TSEntityName, def("TSExternalModuleReference")));
     def("TSExternalModuleReference")
         .bases("Declaration")
         .build("expression")
@@ -306,14 +310,13 @@ function default_1(fork) {
         .build("body")
         .field("body", [TSTypeMember]);
     def("TSExpressionWithTypeArguments")
-        .bases("TSType")
+        .bases("TSType", "TSHasOptionalTypeParameterInstantiation")
         .build("expression", "typeParameters")
-        .field("expression", IdOrQualifiedName)
-        .field("typeParameters", or(def("TSTypeParameterInstantiation"), null), defaults["null"]);
+        .field("expression", TSEntityName);
     def("TSInterfaceDeclaration")
         .bases("Declaration", "TSHasOptionalTypeParameters")
         .build("id", "body")
-        .field("id", IdOrQualifiedName)
+        .field("id", TSEntityName)
         .field("declare", Boolean, defaults["false"])
         .field("extends", or([def("TSExpressionWithTypeArguments")], null), defaults["null"])
         .field("body", def("TSInterfaceBody"));
@@ -323,6 +326,9 @@ function default_1(fork) {
         .field("accessibility", or("public", "private", "protected", void 0), defaults["undefined"])
         .field("readonly", Boolean, defaults["false"])
         .field("parameter", or(def("Identifier"), def("AssignmentPattern")));
+    def("ClassProperty")
+        .field("access", // Not "accessibility"?
+    or("public", "private", "protected", void 0), defaults["undefined"]);
     // Defined already in es6 and babel-core.
     def("ClassBody")
         .field("body", [or(def("MethodDefinition"), def("VariableDeclarator"), def("ClassPropertyDefinition"), def("ClassProperty"), def("ClassPrivateProperty"), def("ClassMethod"), def("ClassPrivateMethod"), 

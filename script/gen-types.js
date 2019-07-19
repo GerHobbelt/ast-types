@@ -6,87 +6,93 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 var recast_1 = require("recast");
-var main_1 = __importDefault(require("../main"));
+var main_1 = require("../main");
 var Op = Object.prototype;
 var hasOwn = Op.hasOwnProperty;
-var b = main_1.default.builders, n = main_1.default.namedTypes, getBuilderName = main_1.default.getBuilderName;
 var RESERVED_WORDS = {
     extends: true,
     default: true,
     arguments: true,
     static: true,
 };
-var NODES_ID = b.identifier("N");
-var NODES_IMPORT = b.importDeclaration([b.importNamespaceSpecifier(NODES_ID)], b.stringLiteral("./nodes"));
-var KINDS_ID = b.identifier("K");
-var KINDS_IMPORT = b.importDeclaration([b.importNamespaceSpecifier(KINDS_ID)], b.stringLiteral("./kinds"));
+var NAMED_TYPES_ID = main_1.builders.identifier("namedTypes");
+var NAMED_TYPES_IMPORT = main_1.builders.importDeclaration([main_1.builders.importSpecifier(NAMED_TYPES_ID)], main_1.builders.stringLiteral("./namedTypes"));
+var KINDS_ID = main_1.builders.identifier("K");
+var KINDS_IMPORT = main_1.builders.importDeclaration([main_1.builders.importNamespaceSpecifier(KINDS_ID)], main_1.builders.stringLiteral("./kinds"));
 var supertypeToSubtypes = getSupertypeToSubtypes();
 var builderTypeNames = getBuilderTypeNames();
 var out = [
     {
         file: "kinds.ts",
         ast: moduleWithBody([
-            NODES_IMPORT
+            NAMED_TYPES_IMPORT
         ].concat(Object.keys(supertypeToSubtypes).map(function (supertype) {
             var buildableSubtypes = getBuildableSubtypes(supertype);
             if (buildableSubtypes.length === 0) {
                 // Some of the XML* types don't have buildable subtypes,
                 // so fall back to using the supertype's node type
-                return b.exportNamedDeclaration(b.tsTypeAliasDeclaration(b.identifier(supertype + "Kind"), b.tsTypeReference(b.tsQualifiedName(NODES_ID, b.identifier(supertype)))));
+                return main_1.builders.exportNamedDeclaration(main_1.builders.tsTypeAliasDeclaration(main_1.builders.identifier(supertype + "Kind"), main_1.builders.tsTypeReference(main_1.builders.tsQualifiedName(NAMED_TYPES_ID, main_1.builders.identifier(supertype)))));
             }
-            return b.exportNamedDeclaration(b.tsTypeAliasDeclaration(b.identifier(supertype + "Kind"), b.tsUnionType(buildableSubtypes.map(function (subtype) {
-                return b.tsTypeReference(b.tsQualifiedName(NODES_ID, b.identifier(subtype)));
+            return main_1.builders.exportNamedDeclaration(main_1.builders.tsTypeAliasDeclaration(main_1.builders.identifier(supertype + "Kind"), main_1.builders.tsUnionType(buildableSubtypes.map(function (subtype) {
+                return main_1.builders.tsTypeReference(main_1.builders.tsQualifiedName(NAMED_TYPES_ID, main_1.builders.identifier(subtype)));
             }))));
         }))),
     },
     {
-        file: "nodes.ts",
-        ast: moduleWithBody([
-            b.importDeclaration([b.importSpecifier(b.identifier("Omit"))], b.stringLiteral("../types")),
-            KINDS_IMPORT
-        ].concat(Object.keys(main_1.default.namedTypes).map(function (typeName) {
-            var typeDef = main_1.default.Type.def(typeName);
-            var ownFieldNames = Object.keys(typeDef.ownFields);
-            return b.exportNamedDeclaration(b.tsInterfaceDeclaration.from({
-                id: b.identifier(typeName),
-                extends: typeDef.baseNames.map(function (baseName) {
-                    var baseDef = main_1.default.Type.def(baseName);
-                    var commonFieldNames = ownFieldNames
-                        .filter(function (fieldName) { return !!baseDef.allFields[fieldName]; });
-                    if (commonFieldNames.length > 0) {
-                        return b.tsExpressionWithTypeArguments(b.identifier("Omit"), b.tsTypeParameterInstantiation([
-                            b.tsTypeReference(b.identifier(baseName)),
-                            b.tsUnionType(commonFieldNames.map(function (fieldName) {
-                                return b.tsLiteralType(b.stringLiteral(fieldName));
-                            })),
-                        ]));
-                    }
-                    else {
-                        return b.tsExpressionWithTypeArguments(b.identifier(baseName));
-                    }
-                }),
-                body: b.tsInterfaceBody(ownFieldNames.map(function (fieldName) {
-                    var field = typeDef.allFields[fieldName];
-                    if (field.name === "type" && field.defaultFn) {
-                        return b.tsPropertySignature(b.identifier("type"), b.tsTypeAnnotation(b.tsLiteralType(b.stringLiteral(field.defaultFn()))));
-                    }
-                    return b.tsPropertySignature(b.identifier(field.name), b.tsTypeAnnotation(getTSTypeAnnotation(field.type)));
-                })),
-            }));
-        }), [
-            b.exportNamedDeclaration(b.tsTypeAliasDeclaration(b.identifier("ASTNode"), b.tsUnionType(Object.keys(main_1.default.namedTypes)
-                .filter(function (typeName) { return main_1.default.Type.def(typeName).buildable; })
-                .map(function (typeName) { return b.tsTypeReference(b.identifier(typeName)); }))))
-        ])),
-    },
-    {
         file: "namedTypes.ts",
         ast: moduleWithBody([
-            b.importDeclaration([b.importSpecifier(b.identifier("Type"))], b.stringLiteral("../lib/types")),
-            NODES_IMPORT,
-            b.exportNamedDeclaration(b.tsInterfaceDeclaration(b.identifier("NamedTypes"), b.tsInterfaceBody(Object.keys(main_1.default.namedTypes).map(function (typeName) {
-                return b.tsPropertySignature(b.identifier(typeName), b.tsTypeAnnotation(b.tsTypeReference(b.identifier("Type"), b.tsTypeParameterInstantiation([
-                    b.tsTypeReference(b.tsQualifiedName(NODES_ID, b.identifier(typeName))),
+            main_1.builders.importDeclaration([main_1.builders.importSpecifier(main_1.builders.identifier("Omit"))], main_1.builders.stringLiteral("../types")),
+            main_1.builders.importDeclaration([main_1.builders.importSpecifier(main_1.builders.identifier("Type"))], main_1.builders.stringLiteral("../lib/types")),
+            KINDS_IMPORT,
+            main_1.builders.exportNamedDeclaration(main_1.builders.tsModuleDeclaration(main_1.builders.identifier("namedTypes"), main_1.builders.tsModuleBlock(Object.keys(main_1.namedTypes).map(function (typeName) {
+                var typeDef = main_1.Type.def(typeName);
+                var ownFieldNames = Object.keys(typeDef.ownFields);
+                return main_1.builders.exportNamedDeclaration(main_1.builders.tsInterfaceDeclaration.from({
+                    id: main_1.builders.identifier(typeName),
+                    extends: typeDef.baseNames.map(function (baseName) {
+                        var baseDef = main_1.Type.def(baseName);
+                        var commonFieldNames = ownFieldNames
+                            .filter(function (fieldName) { return !!baseDef.allFields[fieldName]; });
+                        if (commonFieldNames.length > 0) {
+                            return main_1.builders.tsExpressionWithTypeArguments(main_1.builders.identifier("Omit"), main_1.builders.tsTypeParameterInstantiation([
+                                main_1.builders.tsTypeReference(main_1.builders.identifier(baseName)),
+                                main_1.builders.tsUnionType(commonFieldNames.map(function (fieldName) {
+                                    return main_1.builders.tsLiteralType(main_1.builders.stringLiteral(fieldName));
+                                })),
+                            ]));
+                        }
+                        else {
+                            return main_1.builders.tsExpressionWithTypeArguments(main_1.builders.identifier(baseName));
+                        }
+                    }),
+                    body: main_1.builders.tsInterfaceBody(ownFieldNames.map(function (fieldName) {
+                        var field = typeDef.allFields[fieldName];
+                        if (field.name === "type" && field.defaultFn) {
+                            return main_1.builders.tsPropertySignature(main_1.builders.identifier("type"), main_1.builders.tsTypeAnnotation(main_1.builders.tsLiteralType(main_1.builders.stringLiteral(field.defaultFn()))));
+                        }
+                        else if (field.defaultFn) {
+                            return main_1.builders.tsPropertySignature(main_1.builders.identifier(field.name), main_1.builders.tsTypeAnnotation(getTSTypeAnnotation(field.type)), true);
+                        }
+                        return main_1.builders.tsPropertySignature(main_1.builders.identifier(field.name), main_1.builders.tsTypeAnnotation(getTSTypeAnnotation(field.type)));
+                    })),
+                }));
+            }).concat([
+                main_1.builders.exportNamedDeclaration(main_1.builders.tsTypeAliasDeclaration(main_1.builders.identifier("ASTNode"), main_1.builders.tsUnionType(Object.keys(main_1.namedTypes)
+                    .filter(function (typeName) { return main_1.Type.def(typeName).buildable; })
+                    .map(function (typeName) { return main_1.builders.tsTypeReference(main_1.builders.identifier(typeName)); }))))
+            ], Object.keys(main_1.namedTypes).map(function (typeName) {
+                return main_1.builders.exportNamedDeclaration(main_1.builders.variableDeclaration("let", [
+                    main_1.builders.variableDeclarator(main_1.builders.identifier.from({
+                        name: typeName,
+                        typeAnnotation: main_1.builders.tsTypeAnnotation(main_1.builders.tsTypeReference(main_1.builders.identifier("Type"), main_1.builders.tsTypeParameterInstantiation([
+                            main_1.builders.tsTypeReference(main_1.builders.identifier(typeName)),
+                        ]))),
+                    })),
+                ]));
+            }))))),
+            main_1.builders.exportNamedDeclaration(main_1.builders.tsInterfaceDeclaration(main_1.builders.identifier("NamedTypes"), main_1.builders.tsInterfaceBody(Object.keys(main_1.namedTypes).map(function (typeName) {
+                return main_1.builders.tsPropertySignature(main_1.builders.identifier(typeName), main_1.builders.tsTypeAnnotation(main_1.builders.tsTypeReference(main_1.builders.identifier("Type"), main_1.builders.tsTypeParameterInstantiation([
+                    main_1.builders.tsTypeReference(main_1.builders.tsQualifiedName(main_1.builders.identifier("namedTypes"), main_1.builders.identifier(typeName))),
                 ]))));
             })))),
         ]),
@@ -95,10 +101,10 @@ var out = [
         file: "builders.ts",
         ast: moduleWithBody([
             KINDS_IMPORT,
-            NODES_IMPORT
+            NAMED_TYPES_IMPORT
         ].concat(builderTypeNames.map(function (typeName) {
-            var typeDef = main_1.default.Type.def(typeName);
-            var returnType = b.tsTypeAnnotation(b.tsTypeReference(b.tsQualifiedName(NODES_ID, b.identifier(typeName))));
+            var typeDef = main_1.Type.def(typeName);
+            var returnType = main_1.builders.tsTypeAnnotation(main_1.builders.tsTypeReference(main_1.builders.tsQualifiedName(NAMED_TYPES_ID, main_1.builders.identifier(typeName))));
             var buildParamAllowsUndefined = {};
             var buildParamIsOptional = {};
             typeDef.buildParams.slice().reverse().forEach(function (cur, i, arr) {
@@ -117,77 +123,77 @@ var out = [
                     }
                 }
             });
-            return b.exportNamedDeclaration(b.tsInterfaceDeclaration(b.identifier(typeName + "Builder"), b.tsInterfaceBody([
-                b.tsCallSignatureDeclaration(typeDef.buildParams
+            return main_1.builders.exportNamedDeclaration(main_1.builders.tsInterfaceDeclaration(main_1.builders.identifier(typeName + "Builder"), main_1.builders.tsInterfaceBody([
+                main_1.builders.tsCallSignatureDeclaration(typeDef.buildParams
                     .filter(function (buildParam) { return !!typeDef.allFields[buildParam]; })
                     .map(function (buildParam) {
                     var field = typeDef.allFields[buildParam];
                     var name = RESERVED_WORDS[buildParam] ? buildParam + "Param" : buildParam;
-                    return b.identifier.from({
+                    return main_1.builders.identifier.from({
                         name: name,
-                        typeAnnotation: b.tsTypeAnnotation(!!buildParamAllowsUndefined[buildParam]
-                            ? b.tsUnionType([getTSTypeAnnotation(field.type), b.tsUndefinedKeyword()])
+                        typeAnnotation: main_1.builders.tsTypeAnnotation(!!buildParamAllowsUndefined[buildParam]
+                            ? main_1.builders.tsUnionType([getTSTypeAnnotation(field.type), main_1.builders.tsUndefinedKeyword()])
                             : getTSTypeAnnotation(field.type)),
                         optional: !!buildParamIsOptional[buildParam],
                     });
                 }), returnType),
-                b.tsMethodSignature(b.identifier("from"), [
-                    b.identifier.from({
+                main_1.builders.tsMethodSignature(main_1.builders.identifier("from"), [
+                    main_1.builders.identifier.from({
                         name: "params",
-                        typeAnnotation: b.tsTypeAnnotation(b.tsTypeLiteral(Object.keys(typeDef.allFields)
+                        typeAnnotation: main_1.builders.tsTypeAnnotation(main_1.builders.tsTypeLiteral(Object.keys(typeDef.allFields)
                             .filter(function (fieldName) { return fieldName !== "type"; })
                             .sort() // Sort field name strings lexicographically.
                             .map(function (fieldName) {
                             var field = typeDef.allFields[fieldName];
-                            return b.tsPropertySignature(b.identifier(field.name), b.tsTypeAnnotation(getTSTypeAnnotation(field.type)), field.defaultFn != null || field.hidden);
+                            return main_1.builders.tsPropertySignature(main_1.builders.identifier(field.name), main_1.builders.tsTypeAnnotation(getTSTypeAnnotation(field.type)), field.defaultFn != null || field.hidden);
                         }))),
                     }),
                 ], returnType),
             ])));
         }), [
-            b.exportNamedDeclaration(b.tsInterfaceDeclaration(b.identifier("Builders"), b.tsInterfaceBody(builderTypeNames.map(function (typeName) {
-                return b.tsPropertySignature(b.identifier(getBuilderName(typeName)), b.tsTypeAnnotation(b.tsTypeReference(b.identifier(typeName + "Builder"))));
+            main_1.builders.exportNamedDeclaration(main_1.builders.tsInterfaceDeclaration(main_1.builders.identifier("builders"), main_1.builders.tsInterfaceBody(builderTypeNames.map(function (typeName) {
+                return main_1.builders.tsPropertySignature(main_1.builders.identifier(main_1.getBuilderName(typeName)), main_1.builders.tsTypeAnnotation(main_1.builders.tsTypeReference(main_1.builders.identifier(typeName + "Builder"))));
             }).concat([
-                b.tsIndexSignature([
-                    b.identifier.from({
+                main_1.builders.tsIndexSignature([
+                    main_1.builders.identifier.from({
                         name: "builderName",
-                        typeAnnotation: b.tsTypeAnnotation(b.tsStringKeyword()),
+                        typeAnnotation: main_1.builders.tsTypeAnnotation(main_1.builders.tsStringKeyword()),
                     }),
-                ], b.tsTypeAnnotation(b.tsAnyKeyword())),
+                ], main_1.builders.tsTypeAnnotation(main_1.builders.tsAnyKeyword())),
             ])))),
         ])),
     },
     {
         file: "visitor.ts",
         ast: moduleWithBody([
-            b.importDeclaration([b.importSpecifier(b.identifier("NodePath"))], b.stringLiteral("../lib/node-path")),
-            b.importDeclaration([b.importSpecifier(b.identifier("Context"))], b.stringLiteral("../lib/path-visitor")),
-            NODES_IMPORT,
-            b.exportNamedDeclaration(b.tsInterfaceDeclaration.from({
-                id: b.identifier("Visitor"),
-                typeParameters: b.tsTypeParameterDeclaration([
-                    b.tsTypeParameter("M", undefined, b.tsTypeLiteral([])),
+            main_1.builders.importDeclaration([main_1.builders.importSpecifier(main_1.builders.identifier("NodePath"))], main_1.builders.stringLiteral("../lib/node-path")),
+            main_1.builders.importDeclaration([main_1.builders.importSpecifier(main_1.builders.identifier("Context"))], main_1.builders.stringLiteral("../lib/path-visitor")),
+            NAMED_TYPES_IMPORT,
+            main_1.builders.exportNamedDeclaration(main_1.builders.tsInterfaceDeclaration.from({
+                id: main_1.builders.identifier("Visitor"),
+                typeParameters: main_1.builders.tsTypeParameterDeclaration([
+                    main_1.builders.tsTypeParameter("M", undefined, main_1.builders.tsTypeLiteral([])),
                 ]),
-                body: b.tsInterfaceBody(Object.keys(main_1.default.namedTypes).map(function (typeName) {
-                    return b.tsMethodSignature.from({
-                        key: b.identifier("visit" + typeName),
+                body: main_1.builders.tsInterfaceBody(Object.keys(main_1.namedTypes).map(function (typeName) {
+                    return main_1.builders.tsMethodSignature.from({
+                        key: main_1.builders.identifier("visit" + typeName),
                         parameters: [
-                            b.identifier.from({
+                            main_1.builders.identifier.from({
                                 name: "this",
-                                typeAnnotation: b.tsTypeAnnotation(b.tsIntersectionType([
-                                    b.tsTypeReference(b.identifier("Context")),
-                                    b.tsTypeReference(b.identifier("M")),
+                                typeAnnotation: main_1.builders.tsTypeAnnotation(main_1.builders.tsIntersectionType([
+                                    main_1.builders.tsTypeReference(main_1.builders.identifier("Context")),
+                                    main_1.builders.tsTypeReference(main_1.builders.identifier("M")),
                                 ])),
                             }),
-                            b.identifier.from({
+                            main_1.builders.identifier.from({
                                 name: "path",
-                                typeAnnotation: b.tsTypeAnnotation(b.tsTypeReference(b.identifier("NodePath"), b.tsTypeParameterInstantiation([
-                                    b.tsTypeReference(b.tsQualifiedName(NODES_ID, b.identifier(typeName))),
+                                typeAnnotation: main_1.builders.tsTypeAnnotation(main_1.builders.tsTypeReference(main_1.builders.identifier("NodePath"), main_1.builders.tsTypeParameterInstantiation([
+                                    main_1.builders.tsTypeReference(main_1.builders.tsQualifiedName(NAMED_TYPES_ID, main_1.builders.identifier(typeName))),
                                 ]))),
                             }),
                         ],
                         optional: true,
-                        typeAnnotation: b.tsTypeAnnotation(b.tsAnyKeyword()),
+                        typeAnnotation: main_1.builders.tsTypeAnnotation(main_1.builders.tsAnyKeyword()),
                     });
                 }).slice()),
             })),
@@ -199,15 +205,15 @@ out.forEach(function (_a) {
     fs_1.default.writeFileSync(path_1.default.resolve(__dirname, "../gen/" + file), recast_1.prettyPrint(ast, { tabWidth: 2, includeComments: true }).code);
 });
 function moduleWithBody(body) {
-    return b.file.from({
-        comments: [b.commentBlock(" !!! THIS FILE WAS AUTO-GENERATED BY `npm run gen` !!! ")],
-        program: b.program(body),
+    return main_1.builders.file.from({
+        comments: [main_1.builders.commentBlock(" !!! THIS FILE WAS AUTO-GENERATED BY `npm run gen` !!! ")],
+        program: main_1.builders.program(body),
     });
 }
 function getSupertypeToSubtypes() {
     var supertypeToSubtypes = {};
-    Object.keys(main_1.default.namedTypes).map(function (typeName) {
-        main_1.default.Type.def(typeName).supertypeList.forEach(function (supertypeName) {
+    Object.keys(main_1.namedTypes).map(function (typeName) {
+        main_1.Type.def(typeName).supertypeList.forEach(function (supertypeName) {
             supertypeToSubtypes[supertypeName] = supertypeToSubtypes[supertypeName] || [];
             supertypeToSubtypes[supertypeName].push(typeName);
         });
@@ -215,15 +221,15 @@ function getSupertypeToSubtypes() {
     return supertypeToSubtypes;
 }
 function getBuilderTypeNames() {
-    return Object.keys(main_1.default.namedTypes).filter(function (typeName) {
-        var typeDef = main_1.default.Type.def(typeName);
-        var builderName = getBuilderName(typeName);
-        return !!typeDef.buildParams && !!main_1.default.builders[builderName];
+    return Object.keys(main_1.namedTypes).filter(function (typeName) {
+        var typeDef = main_1.Type.def(typeName);
+        var builderName = main_1.getBuilderName(typeName);
+        return !!typeDef.buildParams && !!main_1.builders[builderName];
     });
 }
 function getBuildableSubtypes(supertype) {
-    return Array.from(new Set(Object.keys(main_1.default.namedTypes).filter(function (typeName) {
-        var typeDef = main_1.default.Type.def(typeName);
+    return Array.from(new Set(Object.keys(main_1.namedTypes).filter(function (typeName) {
+        var typeDef = main_1.Type.def(typeName);
         return typeDef.allSupertypes[supertype] != null && typeDef.buildable;
     })));
 }
@@ -232,56 +238,56 @@ function getTSTypeAnnotation(type) {
         case "ArrayType": {
             var elemTypeAnnotation = getTSTypeAnnotation(type.elemType);
             // TODO Improve this test.
-            return n.TSUnionType.check(elemTypeAnnotation)
-                ? b.tsArrayType(b.tsParenthesizedType(elemTypeAnnotation))
-                : b.tsArrayType(elemTypeAnnotation);
+            return main_1.namedTypes.TSUnionType.check(elemTypeAnnotation)
+                ? main_1.builders.tsArrayType(main_1.builders.tsParenthesizedType(elemTypeAnnotation))
+                : main_1.builders.tsArrayType(elemTypeAnnotation);
         }
         case "IdentityType": {
             if (type.value === null) {
-                return b.tsNullKeyword();
+                return main_1.builders.tsNullKeyword();
             }
             switch (typeof type.value) {
                 case "undefined":
-                    return b.tsUndefinedKeyword();
+                    return main_1.builders.tsUndefinedKeyword();
                 case "string":
-                    return b.tsLiteralType(b.stringLiteral(type.value));
+                    return main_1.builders.tsLiteralType(main_1.builders.stringLiteral(type.value));
                 case "boolean":
-                    return b.tsLiteralType(b.booleanLiteral(type.value));
+                    return main_1.builders.tsLiteralType(main_1.builders.booleanLiteral(type.value));
                 case "number":
-                    return b.tsNumberKeyword();
+                    return main_1.builders.tsNumberKeyword();
                 case "object":
-                    return b.tsObjectKeyword();
+                    return main_1.builders.tsObjectKeyword();
                 case "function":
-                    return b.tsFunctionType([]);
+                    return main_1.builders.tsFunctionType([]);
                 case "symbol":
-                    return b.tsSymbolKeyword();
+                    return main_1.builders.tsSymbolKeyword();
                 default:
-                    return b.tsAnyKeyword();
+                    return main_1.builders.tsAnyKeyword();
             }
         }
         case "ObjectType": {
-            return b.tsTypeLiteral(type.fields.map(function (field) {
-                return b.tsPropertySignature(b.identifier(field.name), b.tsTypeAnnotation(getTSTypeAnnotation(field.type)));
+            return main_1.builders.tsTypeLiteral(type.fields.map(function (field) {
+                return main_1.builders.tsPropertySignature(main_1.builders.identifier(field.name), main_1.builders.tsTypeAnnotation(getTSTypeAnnotation(field.type)));
             }));
         }
         case "OrType": {
-            return b.tsUnionType(type.types.map(function (type) { return getTSTypeAnnotation(type); }));
+            return main_1.builders.tsUnionType(type.types.map(function (type) { return getTSTypeAnnotation(type); }));
         }
         case "PredicateType": {
             if (typeof type.name !== "string") {
-                return b.tsAnyKeyword();
+                return main_1.builders.tsAnyKeyword();
             }
-            if (hasOwn.call(n, type.name)) {
-                return b.tsTypeReference(b.tsQualifiedName(KINDS_ID, b.identifier(type.name + "Kind")));
+            if (hasOwn.call(main_1.namedTypes, type.name)) {
+                return main_1.builders.tsTypeReference(main_1.builders.tsQualifiedName(KINDS_ID, main_1.builders.identifier(type.name + "Kind")));
             }
             if (/^[$A-Z_][a-z0-9_$]*$/i.test(type.name)) {
-                return b.tsTypeReference(b.identifier(type.name));
+                return main_1.builders.tsTypeReference(main_1.builders.identifier(type.name));
             }
             if (/^number [<>=]+ \d+$/.test(type.name)) {
-                return b.tsNumberKeyword();
+                return main_1.builders.tsNumberKeyword();
             }
             // Not much else to do...
-            return b.tsAnyKeyword();
+            return main_1.builders.tsAnyKeyword();
         }
         default:
             return assertNever(type);

@@ -3,24 +3,24 @@ import * as K from "./kinds";
 import { namedTypes } from "./namedTypes";
 
 export interface SourceLocationBuilder {
-  (start: K.PositionKind, end: K.PositionKind, source?: string | null): N.SourceLocation;
+  (start: K.PositionKind, end: K.PositionKind, source?: string | null): namedTypes.SourceLocation;
   from(
     params: {
       end: K.PositionKind,
       source?: string | null,
       start: K.PositionKind
     }
-  ): N.SourceLocation;
+  ): namedTypes.SourceLocation;
 }
 
 export interface PositionBuilder {
-  (line: number, column: number): N.Position;
+  (line: number, column: number): namedTypes.Position;
   from(
     params: {
       column: number,
       line: number
     }
-  ): N.Position;
+  ): namedTypes.Position;
 }
 
 export interface FileBuilder {
@@ -2620,7 +2620,7 @@ export interface TSTypeReferenceBuilder {
 }
 
 export interface TSAsExpressionBuilder {
-  (expression: K.ExpressionKind): namedTypes.TSAsExpression;
+  (expression: K.ExpressionKind, typeAnnotation: K.TSTypeKind): namedTypes.TSAsExpression;
   from(
     params: {
       comments?: K.CommentKind[] | null,
@@ -3262,22 +3262,6 @@ export interface TSModuleDeclarationBuilder {
   ): namedTypes.TSModuleDeclaration;
 }
 
-export interface TSImportTypeBuilder {
-  (
-    argument: K.StringLiteralKind | K.IdentifierKind | K.TSQualifiedNameKind,
-    qualifier?: K.StringLiteralKind | K.IdentifierKind | K.TSQualifiedNameKind | null | undefined
-  ): N.TSImportType;
-  from(
-    params: {
-      argument: K.StringLiteralKind | K.IdentifierKind | K.TSQualifiedNameKind,
-      comments?: K.CommentKind[] | null,
-      loc?: K.SourceLocationKind | null,
-      qualifier?: K.StringLiteralKind | K.IdentifierKind | K.TSQualifiedNameKind | null | undefined,
-      typeParameters?: K.TSTypeParameterDeclarationKind | null | undefined
-    }
-  ): N.TSImportType;
-}
-
 export interface TSImportEqualsDeclarationBuilder {
   (
     id: K.IdentifierKind,
@@ -3640,7 +3624,6 @@ export interface builders {
   tsTypeAliasDeclaration: TSTypeAliasDeclarationBuilder;
   tsModuleBlock: TSModuleBlockBuilder;
   tsModuleDeclaration: TSModuleDeclarationBuilder;
-  tsImportType: TSImportTypeBuilder;
   tsImportEqualsDeclaration: TSImportEqualsDeclarationBuilder;
   tsExternalModuleReference: TSExternalModuleReferenceBuilder;
   tsExportAssignment: TSExportAssignmentBuilder;

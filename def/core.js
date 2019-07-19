@@ -159,8 +159,7 @@ function default_1(fork) {
         .build("id", "init")
         .field("id", def("Pattern"))
         .field("init", or(def("Expression"), null), defaults["null"]);
-    // TODO Are all Expressions really Patterns?
-    def("Expression").bases("Node", "Pattern");
+    def("Expression").bases("Node");
     def("ThisExpression").bases("Expression").build();
     def("ArrayExpression")
         .bases("Expression")
@@ -191,7 +190,7 @@ function default_1(fork) {
         // always true for unary operators.
         .field("prefix", Boolean, defaults["true"]);
     var BinaryOperator = or("==", "!=", "===", "!==", "<", "<=", ">", ">=", "<<", ">>", ">>>", "+", "-", "*", "/", "%", "**", "&", // TODO Missing from the Parser API.
-    "|", "^", "in", "instanceof", "..");
+    "|", "^", "in", "instanceof");
     def("BinaryExpression")
         .bases("Expression")
         .build("operator", "left", "right")
@@ -203,7 +202,7 @@ function default_1(fork) {
         .bases("Expression")
         .build("operator", "left", "right")
         .field("operator", AssignmentOperator)
-        .field("left", def("Pattern"))
+        .field("left", or(def("Pattern"), def("MemberExpression")))
         .field("right", def("Expression"));
     var UpdateOperator = or("++", "--");
     def("UpdateExpression")
@@ -260,14 +259,12 @@ function default_1(fork) {
         .field("test", or(def("Expression"), null))
         .field("consequent", [def("Statement")]);
     def("Identifier")
-        // But aren't Expressions and Patterns already Nodes? TODO Report this.
-        .bases("Node", "Expression", "Pattern")
+        .bases("Expression", "Pattern")
         .build("name")
         .field("name", String)
         .field("optional", Boolean, defaults["false"]);
     def("Literal")
-        // But aren't Expressions already Nodes? TODO Report this.
-        .bases("Node", "Expression")
+        .bases("Expression")
         .build("value")
         .field("value", or(String, Boolean, null, Number, RegExp))
         .field("regex", or({
