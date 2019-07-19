@@ -555,6 +555,7 @@ describe("NodePath", function () {
         assert_1.default.strictEqual(opPath.parent.node, ast);
     });
     var binaryYield = main_1.builders.expressionStatement(main_1.builders.logicalExpression("&&", main_1.builders.yieldExpression(main_1.builders.identifier("a"), false), main_1.builders.yieldExpression(main_1.builders.identifier("b"), true)));
+    var binaryAwait = main_1.builders.expressionStatement(main_1.builders.logicalExpression("&&", main_1.builders.awaitExpression(main_1.builders.identifier("a")), main_1.builders.awaitExpression(main_1.builders.identifier("b"))));
     it("should support .needsParens()", function () {
         var argPath = path.get("expression", "argument");
         assert_1.default.ok(argPath.needsParens());
@@ -569,6 +570,17 @@ describe("NodePath", function () {
         var sequenceAssignmentAST = main_1.builders.assignmentExpression('=', main_1.builders.identifier('a'), main_1.builders.sequenceExpression([main_1.builders.literal(1), main_1.builders.literal(2)]));
         var sequenceAssignmentPath = new main_1.NodePath(sequenceAssignmentAST);
         assert_1.default.ok(sequenceAssignmentPath.get("right").needsParens());
+    });
+    it("should correctly determine .needsParens() for await", function () {
+        var programPath = new main_1.NodePath(esprima_1.parse("async v => (await v).b"));
+        var memberPath = programPath.get("body", 0, "expression", "body");
+        main_1.namedTypes.MemberExpression.assert(memberPath.value);
+        assert_1.default.ok(!memberPath.needsParens());
+        assert_1.default.ok(memberPath.get("object").needsParens());
+        var baPath = new main_1.NodePath(binaryAwait);
+        assert_1.default.ok(!baPath.get("expression").needsParens());
+        assert_1.default.ok(baPath.get("expression", "left").needsParens());
+        assert_1.default.ok(baPath.get("expression", "right").needsParens());
     });
     it("should support .needsParens(true)", function () {
         var programPath = new main_1.NodePath(esprima_1.parse("(function(){})"));

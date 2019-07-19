@@ -34,12 +34,7 @@ function default_1(fork) {
     ].forEach(function (typeName) {
         def(typeName)
             .field("typeParameters", TypeParamDecl, defaults["null"])
-            .field("superTypeParameters", or(def("TypeParameterInstantiation"), def("TSTypeParameterInstantiation"), null), defaults["null"]);
-    });
-    ["ClassDeclaration",
-        "ClassExpression",
-    ].forEach(function (typeName) {
-        def(typeName)
+            .field("superTypeParameters", or(def("TypeParameterInstantiation"), def("TSTypeParameterInstantiation"), null), defaults["null"])
             .field("implements", or([def("ClassImplements")], [def("TSExpressionWithTypeArguments")]), defaults.emptyArray);
     });
 }

@@ -51,6 +51,29 @@ describe("flow types", function () {
         assert_1.default.notEqual(program.body[0].typeAnnotation, undefined);
         assert_1.default.strictEqual(program.body[0].typeAnnotation.type, 'TypeAnnotation');
     });
+    it("Explicit type arguments", function () {
+        var parser = {
+            parse: function (code) {
+                return flow_parser_1.default.parse(code, {
+                    types: true
+                });
+            }
+        };
+        var program = parser.parse([
+            'test<A>();',
+            'test<B, C>();',
+            'new test<D>();',
+            'new test<E, F>();',
+        ].join("\n"));
+        var typeParamNames = [];
+        types.visit(program, {
+            visitGenericTypeAnnotation: function (path) {
+                typeParamNames.push(path.node.id.name);
+                this.traverse(path);
+            }
+        });
+        assert_1.default.deepEqual(typeParamNames, ["A", "B", "C", "D", "E", "F"]);
+    });
     describe('scope', function () {
         var scope = [
             "type Foo = {}",
