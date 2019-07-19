@@ -601,7 +601,8 @@ export interface NewExpressionBuilder {
       arguments: (K.ExpressionKind | K.SpreadElementKind)[],
       callee: K.ExpressionKind,
       comments?: K.CommentKind[] | null,
-      loc?: K.SourceLocationKind | null
+      loc?: K.SourceLocationKind | null,
+      typeArguments?: null | K.TypeParameterInstantiationKind
     }
   ): namedTypes.NewExpression;
 }
@@ -616,7 +617,8 @@ export interface CallExpressionBuilder {
       arguments: (K.ExpressionKind | K.SpreadElementKind)[],
       callee: K.ExpressionKind,
       comments?: K.CommentKind[] | null,
-      loc?: K.SourceLocationKind | null
+      loc?: K.SourceLocationKind | null,
+      typeArguments?: null | K.TypeParameterInstantiationKind
     }
   ): namedTypes.CallExpression;
 }
@@ -3383,7 +3385,8 @@ export interface OptionalCallExpressionBuilder {
       callee: K.ExpressionKind,
       comments?: K.CommentKind[] | null,
       loc?: K.SourceLocationKind | null,
-      optional?: boolean
+      optional?: boolean,
+      typeArguments?: null | K.TypeParameterInstantiationKind
     }
   ): namedTypes.OptionalCallExpression;
 }
