@@ -1,7 +1,7 @@
 {
   "author": "Ben Newman <bn@cs.stanford.edu>",
   "name": "@gerhobbelt/ast-types",
-  "version": "0.13.2-27",
+  "version": "0.13.2-28",
   "description": "Esprima-compatible implementation of the Mozilla JS Parser API",
   "keywords": [
     "ast",
@@ -27,6 +27,15 @@
   "license": "MIT",
   "main": "main.js",
   "types": "main.d.ts",
+  "files": [
+    "*.ts",
+    "*.js",
+    "*.json",
+    "def/**/*.[js,ts]",
+    "gen/**/*.[js,ts]",
+    "lib/**/*.[js,ts]",
+    "types/**/*.[js,ts]"
+  ],
   "scripts": {
     "gen": "ts-node --transpile-only script/gen-types.ts",
     "tsc": "tsc --noEmit",
@@ -36,7 +45,7 @@
     "mocha": "bash -c test/run.sh",
     "clean": "ts-emit-clean && npm run clean-test-data",
     "build": "tsc && ts-add-module-exports && npm run compile-tests",
-    "prepack": "npm run clean && npm run gen && npm run build",
+    "orig-prepack": "npm run clean && npm run gen && npm run build",
     "postpack": "npm run clean",
     "pub": "npm publish --access public"
   },
