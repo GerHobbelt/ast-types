@@ -18,7 +18,6 @@ then
     rm -rf /tmp/babel
 fi
 
-# Hard-code this for now.
 TS_TAG=v$(node -p 'require("typescript/package.json").version')
 
 if [ ! -d typescript-compiler ]
