@@ -403,12 +403,14 @@ export default function typesPlugin(_fork: Fork) {
   };
   var builtInTypes = {} as BuiltInTypes;
 
-  function defBuiltInType<T>(example: T, name: keyof BuiltInTypes): Type<T> {
+  function defBuiltInType<T>(exampleT: T, name: keyof BuiltInTypes): Type<T> {
+    const example = exampleT as any;
     const objStr = objToStr.call(example);
 
     const type = new PredicateType<T>(name, value => objToStr.call(value) === objStr);
 
-    builtInTypes[name] = type;
+    const hack = builtInTypes as any;
+    hack[name] = type;
 
     if (example && typeof example.constructor === "function") {
       builtInCtorFns.push(example.constructor);
