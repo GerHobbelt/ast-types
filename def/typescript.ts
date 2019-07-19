@@ -145,6 +145,7 @@ export default function (fork: Fork) {
   var ParametersType = [or(
     def("Identifier"),
     def("RestElement"),
+    def("ArrayPattern"),
     def("ObjectPattern")
   )];
 
@@ -449,6 +450,11 @@ export default function (fork: Fork) {
     .field("readonly", Boolean, defaults["false"])
     .field("parameter", or(def("Identifier"),
                            def("AssignmentPattern")));
+
+  def("ClassProperty")
+    .field("access", // Not "accessibility"?
+           or("public", "private", "protected", void 0),
+           defaults["undefined"])
 
   // Defined already in es6 and babel-core.
   def("ClassBody")
