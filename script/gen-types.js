@@ -1,4 +1,11 @@
 "use strict";
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -24,9 +31,9 @@ var builderTypeNames = getBuilderTypeNames();
 var out = [
     {
         file: "kinds.ts",
-        ast: moduleWithBody([
+        ast: moduleWithBody(__spreadArrays([
             NAMED_TYPES_IMPORT
-        ].concat(Object.keys(supertypeToSubtypes).map(function (supertype) {
+        ], Object.keys(supertypeToSubtypes).map(function (supertype) {
             var buildableSubtypes = getBuildableSubtypes(supertype);
             if (buildableSubtypes.length === 0) {
                 // Some of the XML* types don't have buildable subtypes,
@@ -44,7 +51,7 @@ var out = [
             main_1.builders.importDeclaration([main_1.builders.importSpecifier(main_1.builders.identifier("Omit"))], main_1.builders.stringLiteral("../types")),
             main_1.builders.importDeclaration([main_1.builders.importSpecifier(main_1.builders.identifier("Type"))], main_1.builders.stringLiteral("../lib/types")),
             KINDS_IMPORT,
-            main_1.builders.exportNamedDeclaration(main_1.builders.tsModuleDeclaration(main_1.builders.identifier("namedTypes"), main_1.builders.tsModuleBlock(Object.keys(main_1.namedTypes).map(function (typeName) {
+            main_1.builders.exportNamedDeclaration(main_1.builders.tsModuleDeclaration(main_1.builders.identifier("namedTypes"), main_1.builders.tsModuleBlock(__spreadArrays(Object.keys(main_1.namedTypes).map(function (typeName) {
                 var typeDef = main_1.Type.def(typeName);
                 var ownFieldNames = Object.keys(typeDef.ownFields);
                 return main_1.builders.exportNamedDeclaration(main_1.builders.tsInterfaceDeclaration.from({
@@ -76,7 +83,7 @@ var out = [
                         return main_1.builders.tsPropertySignature(main_1.builders.identifier(field.name), main_1.builders.tsTypeAnnotation(getTSTypeAnnotation(field.type)));
                     })),
                 }));
-            }).concat([
+            }), [
                 main_1.builders.exportNamedDeclaration(main_1.builders.tsTypeAliasDeclaration(main_1.builders.identifier("ASTNode"), main_1.builders.tsUnionType(Object.keys(main_1.namedTypes)
                     .filter(function (typeName) { return main_1.Type.def(typeName).buildable; })
                     .map(function (typeName) { return main_1.builders.tsTypeReference(main_1.builders.identifier(typeName)); }))))
@@ -99,15 +106,15 @@ var out = [
     },
     {
         file: "builders.ts",
-        ast: moduleWithBody([
+        ast: moduleWithBody(__spreadArrays([
             KINDS_IMPORT,
             NAMED_TYPES_IMPORT
-        ].concat(builderTypeNames.map(function (typeName) {
+        ], builderTypeNames.map(function (typeName) {
             var typeDef = main_1.Type.def(typeName);
             var returnType = main_1.builders.tsTypeAnnotation(main_1.builders.tsTypeReference(main_1.builders.tsQualifiedName(NAMED_TYPES_ID, main_1.builders.identifier(typeName))));
             var buildParamAllowsUndefined = {};
             var buildParamIsOptional = {};
-            typeDef.buildParams.slice().reverse().forEach(function (cur, i, arr) {
+            __spreadArrays(typeDef.buildParams).reverse().forEach(function (cur, i, arr) {
                 var field = typeDef.allFields[cur];
                 if (field && field.defaultFn) {
                     if (i === 0) {
@@ -151,9 +158,9 @@ var out = [
                 ], returnType),
             ])));
         }), [
-            main_1.builders.exportNamedDeclaration(main_1.builders.tsInterfaceDeclaration(main_1.builders.identifier("builders"), main_1.builders.tsInterfaceBody(builderTypeNames.map(function (typeName) {
+            main_1.builders.exportNamedDeclaration(main_1.builders.tsInterfaceDeclaration(main_1.builders.identifier("builders"), main_1.builders.tsInterfaceBody(__spreadArrays(builderTypeNames.map(function (typeName) {
                 return main_1.builders.tsPropertySignature(main_1.builders.identifier(main_1.getBuilderName(typeName)), main_1.builders.tsTypeAnnotation(main_1.builders.tsTypeReference(main_1.builders.identifier(typeName + "Builder"))));
-            }).concat([
+            }), [
                 main_1.builders.tsIndexSignature([
                     main_1.builders.identifier.from({
                         name: "builderName",
@@ -174,7 +181,7 @@ var out = [
                 typeParameters: main_1.builders.tsTypeParameterDeclaration([
                     main_1.builders.tsTypeParameter("M", undefined, main_1.builders.tsTypeLiteral([])),
                 ]),
-                body: main_1.builders.tsInterfaceBody(Object.keys(main_1.namedTypes).map(function (typeName) {
+                body: main_1.builders.tsInterfaceBody(__spreadArrays(Object.keys(main_1.namedTypes).map(function (typeName) {
                     return main_1.builders.tsMethodSignature.from({
                         key: main_1.builders.identifier("visit" + typeName),
                         parameters: [
@@ -195,7 +202,7 @@ var out = [
                         optional: true,
                         typeAnnotation: main_1.builders.tsTypeAnnotation(main_1.builders.tsAnyKeyword()),
                     });
-                }).slice()),
+                }))),
             })),
         ]),
     },
